@@ -64,13 +64,14 @@ static void usage()
     printf("Usage: nv_readvalue -ix index -sz size [-off offset] \n"
 	   "\t[-pwdo <owner password>] [-pwdd <area password>] [-of <data file name>]\n"
 	   "\n"
-	   " -pwdo pwd    : The TPM owner password.\n"
-	   " -ix index    : The index of the memory to use in hex.\n"
-	   " -sz size      : The number of bytes to read.\n"
-	   " -off offset    : The offset in memory where to start reading from (default 0)\n"
+	   " -pwdo pwd       : The TPM owner password.\n"
+	   " -ix index       : The index of the memory to use in hex.\n"
+	   " -sz size        : The number of bytes to read.\n"
+	   " -off offset     : The offset in memory where to start reading from (default 0)\n"
 	   " -pwdd password  : The password for the memory area.\n"
-	   " -of file      : File to store the read bytes.\n"
-	   " -ee num      : Expected error number.\n"
+	   " -of file        : File to store the read bytes.\n"
+	   " -ee num         : Expected error number.\n"
+	   " -a              : Print only output returned from index, in ASCII"
 	   "\n"
            "With -pwdo, does TPM_ReadValue\n"
            "With -pwdd, does TPM_ReadValueAuth\n"
@@ -103,6 +104,7 @@ int main(int argc, char * argv[]) {
 	const char *datafilename = NULL;
 	FILE *datafile = NULL;
 	int verbose = FALSE;
+	int ascii_only = FALSE;
 	
 	i = 1;
 	
@@ -182,6 +184,9 @@ int main(int argc, char * argv[]) {
 		if (!strcmp("-v",argv[i])) {
 			verbose = TRUE;
 			TPM_setlog(1);
+		} else
+		if (!strcmp("-a",argv[i])) {
+			ascii_only = TRUE;
 		} else
 		if (!strcmp("-h",argv[i])) {
 			usage();
@@ -264,18 +269,20 @@ int main(int argc, char * argv[]) {
 	if (0 == ret) {
 		uint32_t i = 0;
 		int is_ascii = TRUE;
-		printf("Received %d bytes: ",readbufferlen);
-		while (i < readbufferlen) {
-			printf("%02x ",readbuffer[i]);
-			if (readbuffer[i] < ' ' || readbuffer[i] >= 128) {
-				is_ascii = FALSE;
-			}
-			i++;
+		if (ascii_only == FALSE) {
+			printf("Received %d bytes: ",readbufferlen);
+			while (i < readbufferlen) {
+				printf("%02x ",readbuffer[i]);
+				if (readbuffer[i] < ' ' || readbuffer[i] >= 128) {
+					is_ascii = FALSE;
+					}
+				i++;
+				}
 		}
-		printf("\n");
+		printf((ascii_only == FALSE)?"\n":"");
 		if (TRUE == is_ascii) {
 			readbuffer[readbufferlen] = 0;
-			printf("Text: %s\n",readbuffer);
+			printf((ascii_only == TRUE)?"%s":"Text: %s\n",readbuffer);
 		}
 	}
 	/* optionally write the data to a file */
