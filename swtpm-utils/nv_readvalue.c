@@ -72,6 +72,7 @@ static void usage()
 	   " -of file        : File to store the read bytes.\n"
 	   " -ee num         : Expected error number.\n"
 	   " -a              : Print only output returned from index, in ASCII"
+	   " -n              : Append newline to output (useful for partial reads)"
 	   "\n"
            "With -pwdo, does TPM_ReadValue\n"
            "With -pwdd, does TPM_ReadValueAuth\n"
@@ -105,6 +106,7 @@ int main(int argc, char * argv[]) {
 	FILE *datafile = NULL;
 	int verbose = FALSE;
 	int ascii_only = FALSE;
+	int append_newline = FALSE;
 	
 	i = 1;
 	
@@ -187,6 +189,9 @@ int main(int argc, char * argv[]) {
 		} else
 		if (!strcmp("-a",argv[i])) {
 			ascii_only = TRUE;
+		} else
+		if (!strcmp("-n",argv[i])) {
+			append_newline = TRUE;
 		} else
 		if (!strcmp("-h",argv[i])) {
 			usage();
@@ -282,8 +287,9 @@ int main(int argc, char * argv[]) {
 		printf((ascii_only == FALSE)?"\n":"");
 		if (TRUE == is_ascii) {
 			readbuffer[readbufferlen] = 0;
-			printf((ascii_only == TRUE)?"%s":"Text: %s\n",readbuffer);
+			printf((ascii_only == TRUE)?"%s":"Text: %s",readbuffer);
 		}
+		printf((ascii_only == FALSE || append_newline == TRUE)?"\n":"");
 	}
 	/* optionally write the data to a file */
 	if ((0 == ret) && (datafilename != NULL)) {
