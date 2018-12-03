@@ -1,3 +1,4 @@
+# This repository is intended to be used with https://github.com/gastamper/dracut-tpm
 
 Storing your LUKS key in TPM NVRAM
 
